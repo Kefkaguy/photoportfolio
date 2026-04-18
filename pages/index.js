@@ -1,21 +1,15 @@
-"use client"
-
 import Head from "next/head"
 import Image from "next/image"
+import { AnimatePresence, motion, useInView } from "framer-motion"
 import { useRef, useState } from "react"
-import { motion, useInView, AnimatePresence } from "framer-motion"
 import {
-  RiMapPin2Line,
-  RiMailLine,
   RiArrowRightUpLine,
   RiCameraLine,
+  RiMapPin2Line,
+  RiMailLine,
 } from "react-icons/ri"
 
-import portfolio from "@/data/portfolio.json"
-
-function slugify(v) {
-  return v.toLowerCase().replace(/\s+/g, "-")
-}
+import { slugify } from "@/lib/strings"
 
 const ease = [0.22, 1, 0.36, 1]
 
@@ -49,12 +43,13 @@ const staggerFast = {
 
 function AnimatedHeading({ text, className }) {
   const words = text.split(" ")
+
   return (
     <motion.h1 variants={staggerFast} className={className} aria-label={text}>
-      {words.map((word, i) => (
+      {words.map((word, index) => (
         <span
-          key={i}
-          className="inline-block overflow-hidden mr-[0.22em] last:mr-0"
+          key={`${word}-${index}`}
+          className="mr-[0.22em] inline-block overflow-hidden last:mr-0"
         >
           <motion.span
             variants={{
@@ -62,7 +57,7 @@ function AnimatedHeading({ text, className }) {
               show: {
                 y: "0%",
                 opacity: 1,
-                transition: { duration: 0.75, ease, delay: i * 0.055 },
+                transition: { duration: 0.75, ease, delay: index * 0.055 },
               },
             }}
             className="inline-block"
@@ -79,7 +74,7 @@ function NavDot({ label, href }) {
   return (
     <a
       href={href}
-      className="group flex items-center gap-3 text-[11px] font-medium tracking-[0.2em] uppercase text-stone-400 transition-colors duration-200 hover:text-stone-900"
+      className="group flex items-center gap-3 text-[11px] font-medium uppercase tracking-[0.2em] text-stone-400 transition-colors duration-200 hover:text-stone-900"
     >
       <span className="block h-px w-4 bg-stone-300 transition-all duration-300 group-hover:w-7 group-hover:bg-stone-700" />
       {label}
@@ -90,6 +85,7 @@ function NavDot({ label, href }) {
 function InView({ children, className = "" }) {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true, margin: "-100px" })
+
   return (
     <motion.div
       ref={ref}
@@ -111,7 +107,7 @@ function CategoryPill({ label, href }) {
       whileHover={{ scale: 1.05, backgroundColor: "#292524" }}
       whileTap={{ scale: 0.96 }}
       transition={{ duration: 0.22, ease: "easeOut" }}
-      className="inline-block rounded-full bg-stone-900 px-5 py-2.5 text-[11px] font-semibold tracking-[0.15em] uppercase text-stone-100"
+      className="inline-block rounded-full bg-stone-900 px-5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-stone-100"
     >
       {label}
     </motion.a>
@@ -121,6 +117,7 @@ function CategoryPill({ label, href }) {
 function FeaturedCard({ image, index }) {
   const isFirst = index === 0
   const [hovered, setHovered] = useState(false)
+
   return (
     <motion.article
       variants={fadeUp}
@@ -156,7 +153,7 @@ function FeaturedCard({ image, index }) {
           transition={{ duration: 0.4 }}
         />
         <AnimatePresence>
-          {hovered && (
+          {hovered ? (
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
@@ -167,7 +164,7 @@ function FeaturedCard({ image, index }) {
               <RiArrowRightUpLine size={14} />
               <span>View</span>
             </motion.div>
-          )}
+          ) : null}
         </AnimatePresence>
       </div>
       <div className="flex items-center justify-between gap-3 border-t border-stone-200 px-4 py-3">
@@ -182,13 +179,13 @@ function FeaturedCard({ image, index }) {
   )
 }
 
-// ─── Gallery card ────────────────────────────────────────────────────────────
-function GalleryCard({ image, i }) {
+function GalleryCard({ image, index }) {
   const [hovered, setHovered] = useState(false)
+
   return (
     <motion.article
       variants={fadeUp}
-      custom={i}
+      custom={index}
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
       whileHover={{ y: -6 }}
@@ -221,14 +218,14 @@ function GalleryCard({ image, i }) {
       </div>
       <div className="flex items-start justify-between gap-2 px-5 py-4">
         <div>
-          <h3 className="text-base font-semibold tracking-tight text-stone-900 leading-snug">
+          <h3 className="text-base font-semibold leading-snug tracking-tight text-stone-900">
             {image.title}
           </h3>
-          {image.description && (
-            <p className="mt-1 text-sm leading-6 text-stone-500 line-clamp-2">
+          {image.description ? (
+            <p className="mt-1 line-clamp-2 text-sm leading-6 text-stone-500">
               {image.description}
             </p>
-          )}
+          ) : null}
         </div>
         <motion.div
           animate={{
@@ -246,8 +243,7 @@ function GalleryCard({ image, i }) {
   )
 }
 
-// ─── Empty state ─────────────────────────────────────────────────────────────
-function EmptyState({ folder }) {
+function EmptyState({ category }) {
   return (
     <motion.div
       variants={fadeUp}
@@ -256,32 +252,25 @@ function EmptyState({ folder }) {
       <RiCameraLine size={28} className="mb-4 text-stone-300" />
       <p className="text-sm font-medium text-stone-500">No images yet</p>
       <p className="mt-2 text-xs leading-6 text-stone-400">
-        Drop files into{" "}
-        <code className="rounded bg-stone-100 px-1.5 py-0.5 font-mono text-stone-600 text-[11px]">
-          public/images/{folder}
-        </code>{" "}
-        then add entries in{" "}
-        <code className="rounded bg-stone-100 px-1.5 py-0.5 font-mono text-stone-600 text-[11px]">
-          data/portfolio.json
-        </code>
+        Add images to <span className="font-semibold text-stone-600">{category}</span>{" "}
+        once the collection is ready.
       </p>
     </motion.div>
   )
 }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
-export default function Home() {
-  const categories = portfolio.images
-  const featuredImages = categories.flatMap((g) =>
-    g.items
-      .filter((img) => img.featured)
-      .map((img) => ({ ...img, category: g.category })),
+export default function Home({ portfolio }) {
+  const categories = portfolio.images || []
+  const featuredImages = categories.flatMap((group) =>
+    group.items
+      .filter((image) => image.featured)
+      .map((image) => ({ ...image, category: group.category })),
   )
 
   return (
     <>
       <Head>
-        <title>Arman Gaboyan — Photography</title>
+        <title>Arman Gaboyan | Photography</title>
         <meta
           name="description"
           content="Portrait, wedding, watch and travel photography by Arman Gaboyan. Based in Glendale, available worldwide."
@@ -290,7 +279,6 @@ export default function Home() {
       </Head>
 
       <div className="min-h-screen bg-[#f4f2ef] text-stone-900 antialiased">
-        {/* ── Sidebar (xl+) ───────────────────────────────────────────── */}
         <aside className="fixed inset-y-0 left-0 z-30 hidden w-52 flex-col justify-between px-8 py-12 xl:flex">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -305,11 +293,11 @@ export default function Home() {
             </div>
             <div className="mb-10 h-px w-full bg-stone-200" />
             <nav className="flex flex-col gap-5">
-              {categories.map((g) => (
+              {categories.map((group) => (
                 <NavDot
-                  key={g.category}
-                  label={g.category}
-                  href={`#${slugify(g.category)}`}
+                  key={group.id || group.category}
+                  label={group.category}
+                  href={`#${slugify(group.category)}`}
                 />
               ))}
             </nav>
@@ -335,17 +323,14 @@ export default function Home() {
           </motion.div>
         </aside>
 
-        {/* ── Main ────────────────────────────────────────────────────── */}
         <main className="xl:pl-52">
           <div className="mx-auto max-w-6xl px-5 py-12 sm:px-8 sm:py-16 lg:px-12 lg:py-20">
-            {/* ── Hero ── */}
             <motion.section
               variants={stagger}
               initial="hidden"
               animate="show"
               className="mb-20 lg:mb-28"
             >
-              {/* Eyebrow row */}
               <motion.div
                 variants={fadeIn}
                 className="mb-8 flex items-center justify-between"
@@ -353,51 +338,43 @@ export default function Home() {
                 <span className="text-[11px] font-semibold uppercase tracking-[0.3em] text-stone-400">
                   Photography
                 </span>
-                <span className="xl:hidden text-[11px] uppercase tracking-[0.2em] text-stone-400">
+                <span className="text-[11px] uppercase tracking-[0.2em] text-stone-400 xl:hidden">
                   Glendale · CA
                 </span>
               </motion.div>
 
-              {/* Animated name */}
               <AnimatedHeading
                 text="Arman Gaboyan"
                 className="mb-3 text-[clamp(3.2rem,9vw,8rem)] font-bold leading-[0.92] tracking-[-0.04em] text-stone-900"
               />
 
-              {/* Tagline */}
               <motion.p
                 variants={fadeUp}
                 custom={3}
-                className="mb-10 text-[clamp(0.95rem,2.2vw,1.25rem)] font-light leading-snug tracking-tight text-stone-500 max-w-lg"
+                className="mb-10 max-w-lg text-[clamp(0.95rem,2.2vw,1.25rem)] font-light leading-snug tracking-tight text-stone-500"
               >
                 Quiet light, bold moments &amp; image-led storytelling.
               </motion.p>
 
-              {/* Two-col */}
-              <div className="grid gap-10 lg:grid-cols-[1fr_1.2fr] lg:gap-16 lg:items-start">
-                {/* Left */}
+              <div className="grid gap-10 lg:grid-cols-[1fr_1.2fr] lg:items-start lg:gap-16">
                 <div className="flex flex-col gap-6">
                   <motion.p
                     variants={fadeUp}
                     custom={4}
-                    className="text-[15px] leading-8 text-stone-500 max-w-sm"
+                    className="max-w-sm text-[15px] leading-8 text-stone-500"
                   >
                     Based in Glendale, available worldwide. Specialising in
                     portraits, weddings, watch photography and travel. Open for
                     bookings and commissions.
                   </motion.p>
 
-                  {/* Mobile meta */}
                   <motion.div
                     variants={fadeUp}
                     custom={5}
                     className="flex flex-wrap gap-2 xl:hidden"
                   >
                     {[
-                      {
-                        icon: <RiMapPin2Line size={11} />,
-                        text: "Glendale, CA",
-                      },
+                      { icon: <RiMapPin2Line size={11} />, text: "Glendale, CA" },
                       { icon: <RiMailLine size={11} />, text: "Bookings open" },
                     ].map(({ icon, text }) => (
                       <span
@@ -410,29 +387,25 @@ export default function Home() {
                     ))}
                   </motion.div>
 
-                  {/* Category pills */}
-                  <motion.div
-                    variants={staggerFast}
-                    className="flex flex-wrap gap-2"
-                  >
-                    {categories.map((g) => (
+                  <motion.div variants={staggerFast} className="flex flex-wrap gap-2">
+                    {categories.map((group) => (
                       <CategoryPill
-                        key={g.category}
-                        label={g.category}
-                        href={`#${slugify(g.category)}`}
+                        key={group.id || group.category}
+                        label={group.category}
+                        href={`#${slugify(group.category)}`}
                       />
                     ))}
                   </motion.div>
                 </div>
 
-                {/* Right — featured images or placeholder */}
                 {featuredImages.length > 0 ? (
-                  <motion.div
-                    variants={stagger}
-                    className="grid gap-3 sm:grid-cols-2"
-                  >
-                    {featuredImages.map((img, i) => (
-                      <FeaturedCard key={img.src} image={img} index={i} />
+                  <motion.div variants={stagger} className="grid gap-3 sm:grid-cols-2">
+                    {featuredImages.map((image, index) => (
+                      <FeaturedCard
+                        key={image.id || `${image.src}-${index}`}
+                        image={image}
+                        index={index}
+                      />
                     ))}
                   </motion.div>
                 ) : (
@@ -446,21 +419,14 @@ export default function Home() {
                       No featured images yet
                     </p>
                     <p className="mt-1.5 text-xs leading-6 text-stone-400">
-                      Set{" "}
-                      <code className="rounded bg-stone-100 px-1 py-0.5 font-mono text-[11px]">
-                        featured: true
-                      </code>{" "}
-                      on any image in{" "}
-                      <code className="rounded bg-stone-100 px-1 py-0.5 font-mono text-[11px]">
-                        data/portfolio.json
-                      </code>
+                      Mark an uploaded image as featured from the admin panel to
+                      surface it here.
                     </p>
                   </motion.div>
                 )}
               </div>
             </motion.section>
 
-            {/* ── Animated divider ── */}
             <motion.div
               initial={{ scaleX: 0, originX: 0 }}
               whileInView={{ scaleX: 1 }}
@@ -469,11 +435,10 @@ export default function Home() {
               className="mb-20 h-px w-full bg-stone-200"
             />
 
-            {/* ── Gallery sections ── */}
             <div className="flex flex-col gap-24">
               {categories.map((group) => (
                 <section
-                  key={group.category}
+                  key={group.id || group.category}
                   id={slugify(group.category)}
                   className="scroll-mt-12"
                 >
@@ -493,7 +458,7 @@ export default function Home() {
                       <p className="font-mono text-[11px] text-stone-400">
                         {group.items.length === 0
                           ? "No images"
-                          : `${group.items.length} image${group.items.length !== 1 ? "s" : ""}`}
+                          : `${group.items.length} image${group.items.length === 1 ? "" : "s"}`}
                       </p>
                     </motion.div>
 
@@ -502,19 +467,22 @@ export default function Home() {
                         variants={stagger}
                         className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3"
                       >
-                        {group.items.map((img, i) => (
-                          <GalleryCard key={img.src} image={img} i={i} />
+                        {group.items.map((image, index) => (
+                          <GalleryCard
+                            key={image.id || `${image.src}-${index}`}
+                            image={image}
+                            index={index}
+                          />
                         ))}
                       </motion.div>
                     ) : (
-                      <EmptyState folder={group.folder} />
+                      <EmptyState category={group.category} />
                     )}
                   </InView>
                 </section>
               ))}
             </div>
 
-            {/* ── Footer ── */}
             <motion.footer
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -538,4 +506,15 @@ export default function Home() {
       </div>
     </>
   )
+}
+
+export async function getServerSideProps() {
+  const { getPortfolioData } = await import("@/lib/portfolio")
+  const portfolio = await getPortfolioData()
+
+  return {
+    props: {
+      portfolio,
+    },
+  }
 }

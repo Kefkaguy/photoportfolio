@@ -1,8 +1,8 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+This is a [Next.js](https://nextjs.org) photography portfolio with a public site and a lightweight admin panel.
 
 ## Getting Started
 
-First, run the development server:
+First, install dependencies and start the development server:
 
 ```bash
 npm run dev
@@ -14,28 +14,32 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the public site.
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+This repo now contains:
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+- the public portfolio app at the repo root
+- a separate admin app in [admin-site](C:\Users\erosi\OneDrive\Desktop\dadweb\photoportfolio\admin-site)
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+## Environment
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Create `.env.local` from `.env.example` and set:
 
-## Learn More
+- `MONGODB_URI`
+- `MONGODB_DB`
+- `AWS_REGION`
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+- `S3_BUCKET_NAME`
+- `S3_PUBLIC_BASE_URL` (optional if you expose the bucket through a CDN or custom domain)
 
-To learn more about Next.js, take a look at the following resources:
+## Storage
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
+- Categories and image metadata are stored in MongoDB.
+- Image files upload directly from the browser to Amazon S3 using presigned URLs.
+- If MongoDB is not configured, the public homepage falls back to `data/portfolio.json`.
+- The first time MongoDB is connected, the app seeds the database from the local JSON data and also ensures the default categories exist: `Portraits`, `Weddings`, `Watches`, `Travel`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Admin app
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
-# photoportfolio
+The admin panel is a separate Next.js app in [admin-site](C:\Users\erosi\OneDrive\Desktop\dadweb\photoportfolio\admin-site) so it can be deployed on a different domain. Run it from that directory with its own environment variables and deploy it as a separate project.

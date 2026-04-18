@@ -1,14 +1,5 @@
 {
-  "site": {
-    "title": "Elias Hart Photography",
-    "description": "A portfolio website for a photographer with category-based galleries powered by JSON content.",
-    "eyebrow": "Photographer Portfolio",
-    "heading": "Quiet light, bold moments, and image-led storytelling.",
-    "intro": "This homepage is driven by a single JSON file. Add your image to public/images/<category-folder>, then add one object into that category's items array and it will appear automatically.",
-    "location": "Based in Los Angeles, available worldwide",
-    "contactLabel": "Bookings and commissions available",
-    "instructions": "How to update: create or use a category object inside images, set its folder name, place image files in public/images/<folder>, then add image objects into that category's items array. Adding a new category object creates a new section automatically."
-  },
+  
   "images": [
     {
       "category": "Portraits",
@@ -18,16 +9,6 @@
     {
       "category": "Weddings",
       "folder": "weddings",
-      "items": []
-    },
-    {
-      "category": "Watches",
-      "folder": "watches",
-      "items": []
-    },
-    {
-      "category": "Travel",
-      "folder": "travel",
       "items": []
     }
   ]
