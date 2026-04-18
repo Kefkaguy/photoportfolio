@@ -1,5 +1,6 @@
 import Head from "next/head"
 import Image from "next/image"
+import Link from "next/link"
 import { AnimatePresence, motion, useInView } from "framer-motion"
 import { useEffect, useRef, useState } from "react"
 import {
@@ -73,13 +74,13 @@ function AnimatedHeading({ text, className }) {
 
 function NavDot({ label, href }) {
   return (
-    <a
+    <Link
       href={href}
       className="group flex items-center gap-3 text-[11px] font-medium uppercase tracking-[0.2em] text-stone-400 transition-colors duration-200 hover:text-stone-900"
     >
       <span className="block h-px w-4 bg-stone-300 transition-all duration-300 group-hover:w-7 group-hover:bg-stone-700" />
       {label}
-    </a>
+    </Link>
   )
 }
 
@@ -102,16 +103,20 @@ function InView({ children, className = "" }) {
 
 function CategoryPill({ label, href }) {
   return (
-    <motion.a
-      href={href}
+    <motion.div
       variants={fadeUp}
       whileHover={{ scale: 1.05, backgroundColor: "#292524" }}
       whileTap={{ scale: 0.96 }}
       transition={{ duration: 0.22, ease: "easeOut" }}
-      className="inline-block rounded-full bg-stone-900 px-5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-stone-100"
+      className="inline-block rounded-full bg-stone-900"
     >
-      {label}
-    </motion.a>
+      <Link
+        href={href}
+        className="inline-block px-5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-stone-100"
+      >
+        {label}
+      </Link>
+    </motion.div>
   )
 }
 
@@ -385,7 +390,7 @@ export default function Home({ portfolio }) {
                 <NavDot
                   key={group.id || group.category}
                   label={group.category}
-                  href={`#${slugify(group.category)}`}
+                  href={`/${group.slug || slugify(group.category)}`}
                 />
               ))}
             </nav>
@@ -480,7 +485,7 @@ export default function Home({ portfolio }) {
                       <CategoryPill
                         key={group.id || group.category}
                         label={group.category}
-                        href={`#${slugify(group.category)}`}
+                        href={`/${group.slug || slugify(group.category)}`}
                       />
                     ))}
                   </motion.div>
@@ -540,9 +545,17 @@ export default function Home({ portfolio }) {
                         <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-stone-400">
                           Category
                         </p>
-                        <h2 className="text-[clamp(2.2rem,5vw,3.75rem)] font-bold leading-none tracking-[-0.03em] text-stone-900">
+                        <Link
+                          href={`/${group.slug || slugify(group.category)}`}
+                          className="text-[clamp(2.2rem,5vw,3.75rem)] font-bold leading-none tracking-[-0.03em] text-stone-900 transition hover:text-stone-600"
+                        >
                           {group.category}
-                        </h2>
+                        </Link>
+                        {group.description ? (
+                          <p className="mt-3 max-w-2xl text-sm leading-7 text-stone-500">
+                            {group.description}
+                          </p>
+                        ) : null}
                       </div>
                       <p className="font-mono text-[11px] text-stone-400">
                         {group.items.length === 0
