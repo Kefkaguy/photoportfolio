@@ -1,6 +1,5 @@
 import Head from "next/head"
 import Image from "next/image"
-import Link from "next/link"
 import { AnimatePresence, motion, useInView } from "framer-motion"
 import { useEffect, useRef, useState } from "react"
 import {
@@ -81,42 +80,6 @@ function NavDot({ label, href }) {
       <span className="block h-px w-4 bg-stone-300 transition-all duration-300 group-hover:w-7 group-hover:bg-stone-700" />
       {label}
     </Link>
-  )
-}
-
-function InView({ children, className = "" }) {
-  const ref = useRef(null)
-  const inView = useInView(ref, { once: true, margin: "-100px" })
-
-  return (
-    <motion.div
-      ref={ref}
-      variants={stagger}
-      initial="hidden"
-      animate={inView ? "show" : "hidden"}
-      className={className}
-    >
-      {children}
-    </motion.div>
-  )
-}
-
-function CategoryPill({ label, href }) {
-  return (
-    <motion.div
-      variants={fadeUp}
-      whileHover={{ scale: 1.05, backgroundColor: "#292524" }}
-      whileTap={{ scale: 0.96 }}
-      transition={{ duration: 0.22, ease: "easeOut" }}
-      className="inline-block rounded-full bg-stone-900"
-    >
-      <Link
-        href={href}
-        className="inline-block px-5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-stone-100"
-      >
-        {label}
-      </Link>
-    </motion.div>
   )
 }
 
@@ -261,88 +224,6 @@ function FeaturedCard({ image, index, onOpen }) {
   )
 }
 
-function GalleryCard({ image, index, onOpen }) {
-  const [hovered, setHovered] = useState(false)
-
-  return (
-    <motion.button
-      type="button"
-      variants={fadeUp}
-      custom={index}
-      onHoverStart={() => setHovered(true)}
-      onHoverEnd={() => setHovered(false)}
-      onClick={() => onOpen(image)}
-      whileHover={{ y: -6 }}
-      transition={{ duration: 0.4, ease }}
-      className="group overflow-hidden rounded-2xl border border-stone-200 bg-white text-left"
-      style={{
-        boxShadow: hovered
-          ? "0 20px 60px rgba(28,25,23,0.12)"
-          : "0 1px 4px rgba(28,25,23,0.05)",
-        transition: "box-shadow 0.4s ease",
-      }}
-    >
-      <div
-        className="relative overflow-hidden"
-        style={{ aspectRatio: image.aspectRatio || "4/5" }}
-      >
-        <motion.div
-          className="absolute inset-0"
-          animate={{ scale: hovered ? 1.07 : 1 }}
-          transition={{ duration: 0.7, ease }}
-        >
-          <Image
-            src={image.src}
-            alt={image.alt}
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
-            className="object-cover"
-          />
-        </motion.div>
-      </div>
-      <div className="flex items-start justify-between gap-2 px-5 py-4">
-        <div>
-          <h3 className="text-base font-semibold leading-snug tracking-tight text-stone-900">
-            {image.title}
-          </h3>
-          {image.description ? (
-            <p className="mt-1 line-clamp-2 text-sm leading-6 text-stone-500">
-              {image.description}
-            </p>
-          ) : null}
-        </div>
-        <motion.div
-          animate={{
-            x: hovered ? 2 : 0,
-            y: hovered ? -2 : 0,
-            opacity: hovered ? 1 : 0.25,
-          }}
-          transition={{ duration: 0.25 }}
-          className="mt-0.5 shrink-0"
-        >
-          <RiArrowRightUpLine className="text-stone-500" size={18} />
-        </motion.div>
-      </div>
-    </motion.button>
-  )
-}
-
-function EmptyState({ category }) {
-  return (
-    <motion.div
-      variants={fadeUp}
-      className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-stone-300 bg-white/60 px-8 py-16 text-center"
-    >
-      <RiCameraLine size={28} className="mb-4 text-stone-300" />
-      <p className="text-sm font-medium text-stone-500">No images yet</p>
-      <p className="mt-2 text-xs leading-6 text-stone-400">
-        Add images to <span className="font-semibold text-stone-600">{category}</span>{" "}
-        once the collection is ready.
-      </p>
-    </motion.div>
-  )
-}
-
 export default function Home({ portfolio }) {
   const categories = portfolio.images || []
   const featuredImages = categories.flatMap((group) =>
@@ -479,16 +360,6 @@ export default function Home({ portfolio }) {
                       </span>
                     ))}
                   </motion.div>
-
-                  <motion.div variants={staggerFast} className="flex flex-wrap gap-2">
-                    {categories.map((group) => (
-                      <CategoryPill
-                        key={group.id || group.category}
-                        label={group.category}
-                        href={`/${group.slug || slugify(group.category)}`}
-                      />
-                    ))}
-                  </motion.div>
                 </div>
 
                 {featuredImages.length > 0 ? (
@@ -528,63 +399,6 @@ export default function Home({ portfolio }) {
               transition={{ duration: 1, ease }}
               className="mb-20 h-px w-full bg-stone-200"
             />
-
-            <div className="flex flex-col gap-24">
-              {categories.map((group) => (
-                <section
-                  key={group.id || group.category}
-                  id={slugify(group.category)}
-                  className="scroll-mt-12"
-                >
-                  <InView>
-                    <motion.div
-                      variants={fadeUp}
-                      className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between"
-                    >
-                      <div>
-                        <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-stone-400">
-                          Category
-                        </p>
-                        <Link
-                          href={`/${group.slug || slugify(group.category)}`}
-                          className="text-[clamp(2.2rem,5vw,3.75rem)] font-bold leading-none tracking-[-0.03em] text-stone-900 transition hover:text-stone-600"
-                        >
-                          {group.category}
-                        </Link>
-                        {group.description ? (
-                          <p className="mt-3 max-w-2xl text-sm leading-7 text-stone-500">
-                            {group.description}
-                          </p>
-                        ) : null}
-                      </div>
-                      <p className="font-mono text-[11px] text-stone-400">
-                        {group.items.length === 0
-                          ? "No images"
-                          : `${group.items.length} image${group.items.length === 1 ? "" : "s"}`}
-                      </p>
-                    </motion.div>
-
-                    {group.items.length > 0 ? (
-                      <motion.div
-                        variants={stagger}
-                        className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3"
-                      >
-                        {group.items.map((image, index) => (
-                          <GalleryCard
-                            key={image.id || `${image.src}-${index}`}
-                            image={{ ...image, category: group.category }}
-                            index={index}
-                            onOpen={openLightbox}
-                          />
-                        ))}
-                      </motion.div>
-                    ) : (
-                      <EmptyState category={group.category} />
-                    )}
-                  </InView>
-                </section>
-              ))}
-            </div>
 
             <motion.footer
               initial={{ opacity: 0, y: 16 }}
