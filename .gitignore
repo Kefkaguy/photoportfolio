@@ -14,7 +14,7 @@
 # testing
 /coverage
 
-/admin-site/.next/
+/admin-site/
 
 # next.js
 /.next/
