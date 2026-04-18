@@ -1,46 +1,42 @@
 import Head from "next/head"
 import Image from "next/image"
 import Link from "next/link"
-import { AnimatePresence, motion } from "framer-motion"
-import { useEffect, useState } from "react"
+import { AnimatePresence, motion, useInView } from "framer-motion"
+import { useEffect, useRef, useState } from "react"
 import {
   RiArrowLeftLine,
   RiArrowRightUpLine,
   RiCameraLine,
   RiCloseLine,
+  RiMailLine,
 } from "react-icons/ri"
 
-const ease = [0.22, 1, 0.36, 1]
+const ease = [0.25, 0.1, 0.25, 1]
+
+// ─── Lightbox ─────────────────────────────────────────────────────────────────
 
 function Lightbox({ image, category, onClose }) {
   useEffect(() => {
-    if (!image) {
-      return undefined
-    }
-
-    const onKeyDown = (event) => {
-      if (event.key === "Escape") {
-        onClose()
-      }
-    }
-
+    if (!image) return undefined
+    const onKey = (e) => { if (e.key === "Escape") onClose() }
     document.body.style.overflow = "hidden"
-    window.addEventListener("keydown", onKeyDown)
-
+    window.addEventListener("keydown", onKey)
     return () => {
       document.body.style.overflow = ""
-      window.removeEventListener("keydown", onKeyDown)
+      window.removeEventListener("keydown", onKey)
     }
   }, [image, onClose])
 
   return (
     <AnimatePresence>
-      {image ? (
+      {image && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/88 px-4 py-8"
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-50 flex items-center justify-center px-4 py-8"
+          style={{ backgroundColor: "rgba(10,9,8,0.88)" }}
           onClick={onClose}
         >
           <button
@@ -52,60 +48,61 @@ function Lightbox({ image, category, onClose }) {
           </button>
 
           <motion.div
-            initial={{ opacity: 0, scale: 0.96, y: 24 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: 24 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
-            className="relative flex max-h-full w-full max-w-6xl flex-col gap-4"
-            onClick={(event) => event.stopPropagation()}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            transition={{ duration: 0.25, ease }}
+            className="relative flex max-h-full w-full max-w-5xl flex-col gap-4"
+            onClick={(e) => e.stopPropagation()}
           >
-            <div className="relative max-h-[78vh] overflow-hidden rounded-[28px] bg-stone-950">
+            <div className="relative max-h-[78vh] overflow-hidden rounded-2xl bg-stone-950">
               <img
                 src={image.src}
                 alt={image.alt}
                 className="max-h-[78vh] w-full object-contain"
               />
             </div>
-            <div className="flex flex-col gap-2 px-1 text-white sm:flex-row sm:items-end sm:justify-between">
+            <div className="flex flex-col gap-1 px-1 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="text-xl font-semibold tracking-tight">{image.title}</p>
-                {image.description ? (
-                  <p className="mt-1 max-w-2xl text-sm leading-6 text-white/70">
-                    {image.description}
-                  </p>
-                ) : null}
+                <p className="font-display text-xl font-semibold text-white">{image.title}</p>
+                {image.description && (
+                  <p className="mt-1 max-w-2xl text-sm leading-6 text-white/60">{image.description}</p>
+                )}
               </div>
-              <p className="text-xs uppercase tracking-[0.24em] text-white/55">
-                {category}
-              </p>
+              <p className="text-[11px] uppercase tracking-[0.24em] text-white/45">{category}</p>
             </div>
           </motion.div>
         </motion.div>
-      ) : null}
+      )}
     </AnimatePresence>
   )
 }
 
+// ─── Image Card ───────────────────────────────────────────────────────────────
+
 function ImageCard({ image, index, onOpen }) {
+  const ref = useRef(null)
+  const inView = useInView(ref, { once: true, margin: "-50px" })
   const [hovered, setHovered] = useState(false)
 
   return (
     <motion.button
+      ref={ref}
       type="button"
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease, delay: index * 0.06 }}
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
       onClick={() => onOpen(image)}
-      whileHover={{ y: -6 }}
-      className="group overflow-hidden rounded-[28px] border border-stone-200 bg-white text-left shadow-[0_10px_30px_rgba(28,25,23,0.06)]"
+      initial={{ opacity: 0, y: 20 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.5, ease, delay: (index % 6) * 0.07 }}
+      whileHover={{ y: -4 }}
+      className="group w-full overflow-hidden rounded-[22px] border border-stone-200 bg-white text-left transition-shadow duration-300 hover:shadow-[0_16px_48px_rgba(28,25,23,0.1)]"
     >
       <div className="relative overflow-hidden" style={{ aspectRatio: image.aspectRatio || "4/5" }}>
         <motion.div
           className="absolute inset-0"
-          animate={{ scale: hovered ? 1.06 : 1 }}
-          transition={{ duration: 0.7, ease }}
+          animate={{ scale: hovered ? 1.05 : 1 }}
+          transition={{ duration: 0.6, ease }}
         >
           <Image
             src={image.src}
@@ -115,24 +112,41 @@ function ImageCard({ image, index, onOpen }) {
             className="object-cover"
           />
         </motion.div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+        <AnimatePresence>
+          {hovered && (
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="absolute bottom-4 left-4 flex items-center gap-1.5 text-[11px] font-medium text-white"
+            >
+              <RiArrowRightUpLine size={12} />
+              Open
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-      <div className="flex items-start justify-between gap-3 px-5 py-4">
+      <div className="flex items-start justify-between gap-3 border-t border-stone-100 px-5 py-4">
         <div>
-          <h2 className="text-base font-semibold tracking-tight text-stone-900">
+          <h2 className="font-display text-base font-semibold tracking-tight text-stone-900">
             {image.title}
           </h2>
-          {image.description ? (
-            <p className="mt-1 text-sm leading-6 text-stone-500">{image.description}</p>
-          ) : null}
+          {image.description && (
+            <p className="mt-1 text-sm leading-6 text-stone-400">{image.description}</p>
+          )}
         </div>
         <RiArrowRightUpLine
-          className={`mt-0.5 shrink-0 text-stone-500 transition ${hovered ? "translate-x-0.5 -translate-y-0.5 opacity-100" : "opacity-30"}`}
-          size={18}
+          size={15}
+          className="mt-0.5 shrink-0 text-stone-300 transition-all duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-stone-600"
         />
       </div>
     </motion.button>
   )
 }
+
+// ─── Category Page ────────────────────────────────────────────────────────────
 
 export default function CategoryPage({ category }) {
   const [selectedImage, setSelectedImage] = useState(null)
@@ -148,50 +162,64 @@ export default function CategoryPage({ category }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
-      <div className="min-h-screen bg-[#f4f2ef] px-5 py-8 text-stone-900 sm:px-8 lg:px-10">
-        <div className="mx-auto max-w-7xl">
-          <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease }}
-            className="mb-8 flex flex-col gap-6 rounded-[32px] border border-stone-200 bg-white/85 p-6 shadow-[0_30px_120px_rgba(28,25,23,0.08)] backdrop-blur"
-          >
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-stone-400">
-                  Category page
-                </p>
-                <h1 className="mt-3 text-[clamp(2.6rem,6vw,5.5rem)] font-bold leading-[0.95] tracking-[-0.05em] text-stone-900">
-                  {category.category}
-                </h1>
-                {category.description ? (
-                  <p className="mt-4 max-w-3xl text-[15px] leading-8 text-stone-500">
-                    {category.description}
-                  </p>
-                ) : (
-                  <p className="mt-4 max-w-2xl text-[15px] leading-8 text-stone-500">
-                    A dedicated gallery page for {category.category.toLowerCase()} work.
-                  </p>
-                )}
-              </div>
+      <div className="min-h-screen bg-[#f4f2ef] text-stone-900 antialiased">
 
-              <Link
-                href="/"
-                className="inline-flex items-center gap-2 rounded-full border border-stone-300 px-5 py-3 text-sm font-medium text-stone-700 transition hover:border-stone-900 hover:text-stone-900"
-              >
-                <RiArrowLeftLine size={16} />
-                Back home
-              </Link>
+        {/* Header */}
+        <header className="sticky top-0 z-30 border-b border-stone-200/80 bg-[#f4f2ef]/90 backdrop-blur-md">
+          <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-8 lg:px-12">
+            <Link
+              href="/"
+              className="flex items-center gap-2 text-[13px] font-medium text-stone-500 transition hover:text-stone-900"
+            >
+              <RiArrowLeftLine size={15} />
+              Back
+            </Link>
+
+            <div className="flex items-center gap-2 text-stone-400">
+              <RiCameraLine size={12} />
+              <span className="text-[11px] font-semibold uppercase tracking-[0.28em]">Arman Gaboyan</span>
             </div>
 
-            <div className="flex items-center gap-3 text-xs uppercase tracking-[0.24em] text-stone-400">
-              <RiCameraLine size={14} />
-              <span>
+            <a
+              href="mailto:arman@example.com"
+              className="flex items-center gap-2 rounded-full bg-stone-900 px-4 py-2 text-[12px] font-medium text-white transition hover:bg-stone-700"
+            >
+              <RiMailLine size={12} />
+              Contact
+            </a>
+          </div>
+        </header>
+
+        <main className="mx-auto max-w-7xl px-5 pb-24 pt-14 sm:px-8 lg:px-12">
+
+          {/* Page header */}
+          <motion.div
+            className="mb-12"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, ease }}
+          >
+            <div className="mb-3 flex items-center gap-3">
+              <span className="h-px w-6 bg-stone-400" />
+              <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-stone-400">Gallery</p>
+            </div>
+            <h1
+              className="font-display mb-4 font-bold leading-[0.92] tracking-[-0.03em] text-stone-900"
+              style={{ fontSize: "clamp(3rem,8vw,7rem)" }}
+            >
+              {category.category}
+            </h1>
+            <div className="flex items-center gap-4">
+              {category.description && (
+                <p className="text-[15px] leading-8 text-stone-500">{category.description}</p>
+              )}
+              <span className="ml-auto whitespace-nowrap rounded-full border border-stone-200 bg-white px-4 py-1.5 text-[12px] text-stone-400">
                 {category.items.length} image{category.items.length === 1 ? "" : "s"}
               </span>
             </div>
           </motion.div>
 
+          {/* Grid */}
           {category.items.length > 0 ? (
             <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
               {category.items.map((image, index) => (
@@ -204,14 +232,23 @@ export default function CategoryPage({ category }) {
               ))}
             </div>
           ) : (
-            <div className="flex min-h-[280px] items-center justify-center rounded-[28px] border border-dashed border-stone-300 bg-white/70 p-8 text-center text-stone-500">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              className="flex min-h-[280px] items-center justify-center rounded-2xl border border-dashed border-stone-300 bg-white/70 p-8 text-center text-stone-500"
+            >
               No images in this category yet.
-            </div>
+            </motion.div>
           )}
-        </div>
+        </main>
       </div>
 
-      <Lightbox image={selectedImage} category={category.category} onClose={() => setSelectedImage(null)} />
+      <Lightbox
+        image={selectedImage}
+        category={category.category}
+        onClose={() => setSelectedImage(null)}
+      />
     </>
   )
 }
@@ -219,16 +256,6 @@ export default function CategoryPage({ category }) {
 export async function getServerSideProps({ params }) {
   const { getCategoryBySlug } = await import("@/lib/portfolio")
   const category = await getCategoryBySlug(params.slug)
-
-  if (!category) {
-    return {
-      notFound: true,
-    }
-  }
-
-  return {
-    props: {
-      category,
-    },
-  }
+  if (!category) return { notFound: true }
+  return { props: { category } }
 }

@@ -3,3 +3,11 @@
 html {
   scroll-behavior: smooth;
 }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+}
+
+.font-display {
+  font-family: 'Cormorant Garamond', serif;
+}
