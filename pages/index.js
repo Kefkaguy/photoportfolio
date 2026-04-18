@@ -1,5 +1,6 @@
 import Head from "next/head"
 import Image from "next/image"
+import Link from "next/link"
 import { AnimatePresence, motion, useInView } from "framer-motion"
 import { useEffect, useRef, useState } from "react"
 import {
