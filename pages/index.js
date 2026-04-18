@@ -1,10 +1,11 @@
 import Head from "next/head"
 import Image from "next/image"
 import { AnimatePresence, motion, useInView } from "framer-motion"
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import {
   RiArrowRightUpLine,
   RiCameraLine,
+  RiCloseLine,
   RiMapPin2Line,
   RiMailLine,
 } from "react-icons/ri"
@@ -114,19 +115,95 @@ function CategoryPill({ label, href }) {
   )
 }
 
-function FeaturedCard({ image, index }) {
+function Lightbox({ image, onClose }) {
+  useEffect(() => {
+    if (!image) {
+      return undefined
+    }
+
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") {
+        onClose()
+      }
+    }
+
+    document.body.style.overflow = "hidden"
+    window.addEventListener("keydown", onKeyDown)
+
+    return () => {
+      document.body.style.overflow = ""
+      window.removeEventListener("keydown", onKeyDown)
+    }
+  }, [image, onClose])
+
+  return (
+    <AnimatePresence>
+      {image ? (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/88 px-4 py-8"
+          onClick={onClose}
+        >
+          <button
+            type="button"
+            onClick={onClose}
+            className="absolute right-5 top-5 rounded-full border border-white/20 bg-white/10 p-3 text-white transition hover:bg-white/20"
+          >
+            <RiCloseLine size={18} />
+          </button>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96, y: 24 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 24 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="relative flex max-h-full w-full max-w-6xl flex-col gap-4"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="relative max-h-[78vh] overflow-hidden rounded-[28px] bg-stone-950">
+              <img
+                src={image.src}
+                alt={image.alt}
+                className="max-h-[78vh] w-full object-contain"
+              />
+            </div>
+            <div className="flex flex-col gap-2 px-1 text-white sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-xl font-semibold tracking-tight">{image.title}</p>
+                {image.description ? (
+                  <p className="mt-1 max-w-2xl text-sm leading-6 text-white/70">
+                    {image.description}
+                  </p>
+                ) : null}
+              </div>
+              <p className="text-xs uppercase tracking-[0.24em] text-white/55">
+                {image.category}
+              </p>
+            </div>
+          </motion.div>
+        </motion.div>
+      ) : null}
+    </AnimatePresence>
+  )
+}
+
+function FeaturedCard({ image, index, onOpen }) {
   const isFirst = index === 0
   const [hovered, setHovered] = useState(false)
 
   return (
-    <motion.article
+    <motion.button
+      type="button"
       variants={fadeUp}
       custom={index}
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
+      onClick={() => onOpen(image)}
       whileHover={{ y: -6 }}
       transition={{ duration: 0.4, ease }}
-      className={`group relative overflow-hidden rounded-2xl border border-stone-200 bg-stone-100 ${
+      className={`group relative overflow-hidden rounded-2xl border border-stone-200 bg-stone-100 text-left ${
         isFirst ? "sm:row-span-2" : ""
       }`}
     >
@@ -162,7 +239,7 @@ function FeaturedCard({ image, index }) {
               className="absolute bottom-4 left-4 flex items-center gap-1.5 text-xs font-medium text-white"
             >
               <RiArrowRightUpLine size={14} />
-              <span>View</span>
+              <span>Open</span>
             </motion.div>
           ) : null}
         </AnimatePresence>
@@ -175,22 +252,24 @@ function FeaturedCard({ image, index }) {
           {image.category}
         </span>
       </div>
-    </motion.article>
+    </motion.button>
   )
 }
 
-function GalleryCard({ image, index }) {
+function GalleryCard({ image, index, onOpen }) {
   const [hovered, setHovered] = useState(false)
 
   return (
-    <motion.article
+    <motion.button
+      type="button"
       variants={fadeUp}
       custom={index}
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
+      onClick={() => onOpen(image)}
       whileHover={{ y: -6 }}
       transition={{ duration: 0.4, ease }}
-      className="group overflow-hidden rounded-2xl border border-stone-200 bg-white"
+      className="group overflow-hidden rounded-2xl border border-stone-200 bg-white text-left"
       style={{
         boxShadow: hovered
           ? "0 20px 60px rgba(28,25,23,0.12)"
@@ -239,7 +318,7 @@ function GalleryCard({ image, index }) {
           <RiArrowRightUpLine className="text-stone-500" size={18} />
         </motion.div>
       </div>
-    </motion.article>
+    </motion.button>
   )
 }
 
@@ -266,6 +345,15 @@ export default function Home({ portfolio }) {
       .filter((image) => image.featured)
       .map((image) => ({ ...image, category: group.category })),
   )
+  const [selectedImage, setSelectedImage] = useState(null)
+
+  const openLightbox = (image) => {
+    setSelectedImage(image)
+  }
+
+  const closeLightbox = () => {
+    setSelectedImage(null)
+  }
 
   return (
     <>
@@ -405,6 +493,7 @@ export default function Home({ portfolio }) {
                         key={image.id || `${image.src}-${index}`}
                         image={image}
                         index={index}
+                        onOpen={openLightbox}
                       />
                     ))}
                   </motion.div>
@@ -470,8 +559,9 @@ export default function Home({ portfolio }) {
                         {group.items.map((image, index) => (
                           <GalleryCard
                             key={image.id || `${image.src}-${index}`}
-                            image={image}
+                            image={{ ...image, category: group.category }}
                             index={index}
+                            onOpen={openLightbox}
                           />
                         ))}
                       </motion.div>
@@ -504,6 +594,8 @@ export default function Home({ portfolio }) {
           </div>
         </main>
       </div>
+
+      <Lightbox image={selectedImage} onClose={closeLightbox} />
     </>
   )
 }
