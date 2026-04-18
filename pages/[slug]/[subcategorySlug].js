@@ -2,19 +2,18 @@ import Head from "next/head"
 import Image from "next/image"
 import Link from "next/link"
 import { AnimatePresence, motion, useInView } from "framer-motion"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import {
   RiArrowLeftLine,
   RiArrowRightUpLine,
   RiCameraLine,
   RiCloseLine,
   RiMailLine,
-  RiPriceTag3Line,
 } from "react-icons/ri"
 
 const ease = [0.25, 0.1, 0.25, 1]
 
-function Lightbox({ image, category, subcategoryName, onClose }) {
+function Lightbox({ image, category, subcategory, onClose }) {
   useEffect(() => {
     if (!image) {
       return undefined
@@ -73,7 +72,7 @@ function Lightbox({ image, category, subcategoryName, onClose }) {
             <div className="flex flex-col gap-3 px-1">
               <div className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.24em] text-white/45">
                 <span>{category}</span>
-                {subcategoryName ? <span>{subcategoryName}</span> : null}
+                <span>{subcategory}</span>
               </div>
               <div>
                 <p className="text-xl font-semibold text-white">{image.title}</p>
@@ -103,7 +102,7 @@ function Lightbox({ image, category, subcategoryName, onClose }) {
   )
 }
 
-function ImageCard({ image, index, subcategoryName, onOpen }) {
+function ImageCard({ image, index, onOpen }) {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true, margin: "-50px" })
   const [hovered, setHovered] = useState(false)
@@ -168,12 +167,6 @@ function ImageCard({ image, index, subcategoryName, onOpen }) {
           />
         </div>
 
-        {subcategoryName ? (
-          <div className="text-[11px] font-medium uppercase tracking-[0.18em] text-stone-400">
-            {subcategoryName}
-          </div>
-        ) : null}
-
         {Array.isArray(image.tags) && image.tags.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {image.tags.map((tag) => (
@@ -191,55 +184,19 @@ function ImageCard({ image, index, subcategoryName, onOpen }) {
   )
 }
 
-export default function CategoryPage({ category }) {
+export default function SubcategoryPage({ category }) {
   const [selectedImage, setSelectedImage] = useState(null)
-
-  const subcategoryMap = useMemo(
-    () => new Map((category.subcategories || []).map((item) => [item.id, item])),
-    [category.subcategories],
-  )
-
-  const sections = useMemo(() => {
-    const groups = []
-
-    for (const subcategory of category.subcategories || []) {
-      const items = category.items.filter((image) => image.subcategoryId === subcategory.id)
-      if (items.length > 0) {
-        groups.push({
-          id: subcategory.id,
-          name: subcategory.name,
-          items,
-        })
-      }
-    }
-
-    const uncategorized = category.items.filter((image) => !image.subcategoryId)
-    if (uncategorized.length > 0) {
-      groups.push({
-        id: "uncategorized",
-        name: "More work",
-        items: uncategorized,
-      })
-    }
-
-    if (groups.length === 0 && category.items.length > 0) {
-      groups.push({
-        id: "all",
-        name: category.category,
-        items: category.items,
-      })
-    }
-
-    return groups
-  }, [category])
 
   return (
     <>
       <Head>
-        <title>{category.category} | Arman Gaboyan</title>
+        <title>{`${category.subcategory.name} | ${category.category} | Arman Gaboyan`}</title>
         <meta
           name="description"
-          content={category.description || `${category.category} photography by Arman Gaboyan.`}
+          content={
+            category.description ||
+            `${category.subcategory.name} from ${category.category} photography by Arman Gaboyan.`
+          }
         />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
@@ -248,7 +205,7 @@ export default function CategoryPage({ category }) {
         <header className="sticky top-0 z-30 border-b border-stone-200/80 bg-[#f4f2ef]/90 backdrop-blur-md">
           <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-8 lg:px-12">
             <Link
-              href="/"
+              href={`/${category.slug}`}
               className="flex items-center gap-2 text-[13px] font-medium text-stone-500 transition hover:text-stone-900"
             >
               <RiArrowLeftLine size={15} />
@@ -282,36 +239,32 @@ export default function CategoryPage({ category }) {
             <div className="mb-3 flex items-center gap-3">
               <span className="h-px w-6 bg-stone-400" />
               <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-stone-400">
-                Gallery
+                Subcategory
               </p>
+            </div>
+            <div className="mb-4 flex flex-wrap items-center gap-3 text-[11px] uppercase tracking-[0.2em] text-stone-400">
+              <Link href={`/${category.slug}`} className="hover:text-stone-900">
+                {category.category}
+              </Link>
+              <span>/</span>
+              <span className="text-stone-700">{category.subcategory.name}</span>
             </div>
             <h1
               className="mb-4 font-bold leading-[0.92] tracking-[-0.03em] text-stone-900"
               style={{ fontSize: "clamp(3rem,8vw,7rem)" }}
             >
-              {category.category}
+              {category.subcategory.name}
             </h1>
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end">
-              <div className="space-y-4">
-                {category.description ? (
-                  <p className="max-w-3xl text-[15px] leading-8 text-stone-500">
-                    {category.description}
-                  </p>
-                ) : null}
-                {Array.isArray(category.subcategories) && category.subcategories.length > 0 ? (
-                  <div className="flex flex-wrap gap-2">
-                    {category.subcategories.map((item) => (
-                      <Link
-                        key={item.id}
-                        href={`/${category.slug}/${item.slug}`}
-                        className="rounded-full border border-stone-200 bg-white px-3 py-1 text-[11px] font-medium uppercase tracking-[0.16em] text-stone-500"
-                      >
-                        {item.name}
-                      </Link>
-                    ))}
-                  </div>
-                ) : null}
-              </div>
+              {category.description ? (
+                <p className="max-w-3xl text-[15px] leading-8 text-stone-500">
+                  {category.description}
+                </p>
+              ) : (
+                <p className="max-w-3xl text-[15px] leading-8 text-stone-500">
+                  Part of {category.category}.
+                </p>
+              )}
               <span className="lg:ml-auto whitespace-nowrap rounded-full border border-stone-200 bg-white px-4 py-1.5 text-[12px] text-stone-400">
                 {category.items.length} image{category.items.length === 1 ? "" : "s"}
               </span>
@@ -319,30 +272,14 @@ export default function CategoryPage({ category }) {
           </motion.div>
 
           {category.items.length > 0 ? (
-            <div className="space-y-14">
-              {sections.map((section) => (
-                <section key={section.id} className="space-y-5">
-                  {section.name !== category.category ? (
-                    <div className="flex items-center gap-3">
-                      <span className="h-px w-6 bg-stone-300" />
-                      <h2 className="text-lg font-semibold tracking-tight text-stone-900">
-                        {section.name}
-                      </h2>
-                    </div>
-                  ) : null}
-
-                  <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                    {section.items.map((image, index) => (
-                      <ImageCard
-                        key={image.id || `${image.src}-${index}`}
-                        image={image}
-                        index={index}
-                        subcategoryName={subcategoryMap.get(image.subcategoryId)?.name || ""}
-                        onOpen={setSelectedImage}
-                      />
-                    ))}
-                  </div>
-                </section>
+            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+              {category.items.map((image, index) => (
+                <ImageCard
+                  key={image.id || `${image.src}-${index}`}
+                  image={image}
+                  index={index}
+                  onOpen={setSelectedImage}
+                />
               ))}
             </div>
           ) : (
@@ -352,7 +289,7 @@ export default function CategoryPage({ category }) {
               transition={{ duration: 0.5 }}
               className="flex min-h-[280px] items-center justify-center rounded-2xl border border-dashed border-stone-300 bg-white/70 p-8 text-center text-stone-500"
             >
-              No images in this category yet.
+              No images in this subcategory yet.
             </motion.div>
           )}
         </main>
@@ -361,9 +298,7 @@ export default function CategoryPage({ category }) {
       <Lightbox
         image={selectedImage}
         category={category.category}
-        subcategoryName={
-          selectedImage ? subcategoryMap.get(selectedImage.subcategoryId)?.name || "" : ""
-        }
+        subcategory={category.subcategory.name}
         onClose={() => setSelectedImage(null)}
       />
     </>
@@ -371,8 +306,8 @@ export default function CategoryPage({ category }) {
 }
 
 export async function getServerSideProps({ params }) {
-  const { getCategoryBySlug } = await import("@/lib/portfolio")
-  const category = await getCategoryBySlug(params.slug)
+  const { getSubcategoryBySlugs } = await import("@/lib/portfolio")
+  const category = await getSubcategoryBySlugs(params.slug, params.subcategorySlug)
 
   if (!category) {
     return { notFound: true }
