@@ -273,23 +273,14 @@ function FeaturedCard({ image, index, onOpen }) {
       onHoverEnd={() => setHovered(false)}
       onClick={() => onOpen(image)}
       whileHover={{ y: -6 }}
-      className="group relative block overflow-hidden rounded-[28px] text-left"
+      className="group relative block w-full max-w-[420px] overflow-hidden rounded-[28px] text-left"
     >
-      <div
-        className="relative overflow-hidden"
-        style={{ aspectRatio: image.aspectRatio || "4/5" }}
-      >
-        <motion.div
-          className="absolute inset-0"
-          animate={{ scale: hovered ? 1.07 : 1 }}
-          transition={{ duration: 0.7, ease }}
-        >
-          <Image
+      <div className="relative overflow-hidden rounded-[28px]">
+        <motion.div animate={{ scale: hovered ? 1.07 : 1 }} transition={{ duration: 0.7, ease }}>
+          <img
             src={image.src}
             alt={image.alt}
-            fill
-            sizes="(max-width: 1024px) 100vw, 33vw"
-            className="object-cover"
+            className="block h-auto max-h-[560px] w-full rounded-[28px] object-cover"
           />
         </motion.div>
         <motion.div
@@ -328,6 +319,15 @@ function CategoryCard({ group, index }) {
         href={`/${group.slug || slugify(group.category)}`}
         className="group flex h-full flex-col rounded-[28px] border border-stone-200 bg-white px-5 py-5 shadow-[0_10px_30px_rgba(28,25,23,0.05)] transition hover:-translate-y-1 hover:border-stone-300"
       >
+        {group.iconSrc ? (
+          <div className="mb-5 overflow-hidden rounded-[22px] bg-stone-100">
+            <img
+              src={group.iconSrc}
+              alt={`${group.category} preview`}
+              className="h-40 w-full object-cover transition duration-500 group-hover:scale-[1.04]"
+            />
+          </div>
+        ) : null}
         <div className="mb-5 flex items-center justify-between">
           <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-stone-400">
             Category
