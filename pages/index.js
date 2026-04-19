@@ -261,7 +261,6 @@ function Lightbox({ image, onClose }) {
 }
 
 function FeaturedCard({ image, index, onOpen }) {
-  const isFirst = index === 0
   const [hovered, setHovered] = useState(false)
 
   return (
@@ -274,13 +273,11 @@ function FeaturedCard({ image, index, onOpen }) {
       onHoverEnd={() => setHovered(false)}
       onClick={() => onOpen(image)}
       whileHover={{ y: -6 }}
-      className={`group relative overflow-hidden rounded-[28px] border border-stone-200 bg-stone-100 text-left ${
-        isFirst ? "sm:row-span-2" : ""
-      }`}
+      className="group relative block overflow-hidden rounded-[28px] text-left"
     >
       <div
         className="relative overflow-hidden"
-        style={{ aspectRatio: isFirst ? "3/4" : image.aspectRatio || "4/5" }}
+        style={{ aspectRatio: image.aspectRatio || "4/5" }}
       >
         <motion.div
           className="absolute inset-0"
@@ -312,14 +309,9 @@ function FeaturedCard({ image, index, onOpen }) {
               <RiArrowRightUpLine size={14} />
               <span>Open</span>
             </motion.div>
-          ) : null}
-        </AnimatePresence>
-      </div>
-      <div className="border-t border-stone-200 px-4 py-3">
-        <p className="text-sm font-medium tracking-tight text-stone-800">
-          {image.title}
-        </p>
-      </div>
+            ) : null}
+          </AnimatePresence>
+        </div>
     </motion.button>
   )
 }
@@ -463,7 +455,7 @@ export default function Home({ portfolio }) {
 
               <div>
                 {featuredImages.length > 0 ? (
-                  <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="flex flex-wrap items-start gap-4">
                     {featuredImages.map((image, index) => (
                       <FeaturedCard
                         key={image.id || `${image.src}-${index}`}
