@@ -252,9 +252,6 @@ function Lightbox({ image, onClose }) {
                   </p>
                 ) : null}
               </div>
-              <p className="text-xs uppercase tracking-[0.24em] text-white/55">
-                {image.category}
-              </p>
             </div>
           </motion.div>
         </motion.div>
@@ -318,13 +315,10 @@ function FeaturedCard({ image, index, onOpen }) {
           ) : null}
         </AnimatePresence>
       </div>
-      <div className="flex items-center justify-between gap-3 border-t border-stone-200 px-4 py-3">
+      <div className="border-t border-stone-200 px-4 py-3">
         <p className="text-sm font-medium tracking-tight text-stone-800">
           {image.title}
         </p>
-        <span className="text-[10px] uppercase tracking-widest text-stone-400">
-          {image.category}
-        </span>
       </div>
     </motion.button>
   )
@@ -369,11 +363,7 @@ function CategoryCard({ group, index }) {
 
 export default function Home({ portfolio }) {
   const categories = portfolio.images || []
-  const featuredImages = categories.flatMap((group) =>
-    group.items
-      .filter((image) => image.featured)
-      .map((image) => ({ ...image, category: group.category })),
-  )
+  const featuredImages = portfolio.featuredImages || []
   const [selectedImage, setSelectedImage] = useState(null)
 
   const dividerRef = useRef(null)
@@ -495,7 +485,7 @@ export default function Home({ portfolio }) {
                       No featured images yet
                     </p>
                     <p className="mt-1.5 text-xs leading-6 text-stone-400">
-                      Mark an uploaded image as featured from the admin panel.
+                      Upload a featured image from the admin panel.
                     </p>
                   </motion.div>
                 )}
