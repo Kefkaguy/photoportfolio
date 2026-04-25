@@ -18,6 +18,38 @@ import { slugify } from "@/lib/strings"
 
 const ease = [0.25, 0.1, 0.25, 1]
 
+function LosAngelesClock() {
+  const [time, setTime] = useState("")
+
+  useEffect(() => {
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+      timeZone: "America/Los_Angeles",
+      timeZoneName: "short",
+    })
+
+    const updateTime = () => setTime(formatter.format(new Date()))
+    updateTime()
+
+    const timerId = window.setInterval(updateTime, 1000)
+    return () => window.clearInterval(timerId)
+  }, [])
+
+  return (
+    <div
+      className="hidden min-w-[145px] items-center justify-center rounded-full border border-stone-200 bg-white/70 px-4 py-2 text-[11px] font-medium text-stone-600 shadow-[0_8px_24px_rgba(28,25,23,0.04)] backdrop-blur sm:inline-flex"
+      aria-live="polite"
+      aria-label={time ? `Los Angeles time, ${time}` : "Los Angeles time"}
+    >
+      <span className="mr-2 h-1.5 w-1.5 rounded-full bg-stone-400" />
+      <span>{time ? `LA ${time}` : "Los Angeles time"}</span>
+    </div>
+  )
+}
+
 function SiteNav({ categories }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
@@ -54,12 +86,13 @@ function SiteNav({ categories }) {
             </span>
           </Link>
 
-          <div className="hidden items-center gap-2 md:flex">
+          <div className="flex items-center gap-2">
+            <LosAngelesClock />
             <a
-              href="https://www.instagram.com/armangaboyanstudio/"
+              href="https://www.instagram.com/gaboyanproduction/"
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center justify-center rounded-full border border-stone-300 p-2.5 text-stone-600 transition hover:border-stone-900 hover:text-stone-900"
+              className="hidden items-center justify-center rounded-full border border-stone-300 p-2.5 text-stone-600 transition hover:border-stone-900 hover:text-stone-900 md:inline-flex"
               aria-label="Instagram"
             >
               <RiInstagramLine size={14} />
@@ -68,14 +101,14 @@ function SiteNav({ categories }) {
               href="https://www.pinterest.com/armangaboyan/"
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center justify-center rounded-full border border-stone-300 p-2.5 text-stone-600 transition hover:border-stone-900 hover:text-stone-900"
+              className="hidden items-center justify-center rounded-full border border-stone-300 p-2.5 text-stone-600 transition hover:border-stone-900 hover:text-stone-900 md:inline-flex"
               aria-label="Pinterest"
             >
               <RiPinterestLine size={14} />
             </a>
             <a
               href="mailto:arman@example.com"
-              className="inline-flex items-center gap-2 rounded-full bg-stone-900 px-5 py-2.5 text-[13px] font-medium text-white transition-colors hover:bg-stone-700"
+              className="hidden items-center gap-2 rounded-full bg-stone-900 px-5 py-2.5 text-[13px] font-medium text-white transition-colors hover:bg-stone-700 md:inline-flex"
             >
               <RiMailLine size={13} />
               Get in touch
@@ -154,7 +187,7 @@ function SiteNav({ categories }) {
                   </div>
                   <div className="flex items-center gap-3">
                     <a
-                      href="https://www.instagram.com/armangaboyanstudio/"
+                      href="https://www.instagram.com/gaboyanproduction/"
                       target="_blank"
                       rel="noreferrer"
                       className="inline-flex items-center gap-2 rounded-full border border-stone-300 px-4 py-2 text-[12px] text-stone-600 transition hover:border-stone-900 hover:text-stone-900"
@@ -433,7 +466,7 @@ export default function Home({ portfolio }) {
                     Glendale, CA
                   </span>
                   <a
-                    href="https://www.instagram.com/armangaboyanstudio/"
+                    href="https://www.instagram.com/gaboyanproduction/"
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex items-center gap-1.5 rounded-full border border-stone-200 bg-white px-4 py-2 text-[11px] text-stone-500 transition hover:border-stone-900 hover:text-stone-900"
@@ -529,7 +562,7 @@ export default function Home({ portfolio }) {
             </p>
             <div className="mt-3 flex flex-wrap items-center justify-center gap-3 text-[12px] text-stone-500">
               <a
-                href="https://www.instagram.com/armangaboyanstudio/"
+                href="https://www.instagram.com/gaboyanproduction/"
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center gap-1.5 rounded-full border border-stone-300 px-4 py-2 transition hover:border-stone-900 hover:text-stone-900"
