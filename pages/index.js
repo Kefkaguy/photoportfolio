@@ -424,17 +424,16 @@ export default function Home({ portfolio }) {
                   </span>
                 </motion.div>
 
-                <motion.h1
-                  initial={{ opacity: 0, y: 18 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.75, ease, delay: 0.06 }}
-                  className="mb-5 text-[clamp(3.2rem,10vw,7.5rem)] font-bold leading-[0.9] tracking-[-0.06em] text-stone-900"
-                >
-                  Arman
-                  <br />
-                  Gaboyan
-                </motion.h1>
-
+<motion.h1
+  initial={{ opacity: 0, y: 18 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.75, ease, delay: 0.06 }}
+className="mb-5 text-[clamp(3.2rem,10vw,7.5rem)] font-bold leading-[0.9] tracking-[0.01em] text-stone-900"
+>
+  Arman
+  <br />
+  Gaboyan
+</motion.h1>
                 <motion.p
                   initial={{ opacity: 0, y: 18 }}
                   animate={{ opacity: 1, y: 0 }}
